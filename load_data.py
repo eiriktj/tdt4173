@@ -4,7 +4,7 @@ from sklearn.naive_bayes import GaussianNB
 from scipy import ndimage
 import numpy as np
 import os
-from PIL import Image
+from PIL import Image, ImageDraw
 from decimal import Decimal
 
 # 'svc' | 'dt' | 'gnb'
@@ -110,8 +110,11 @@ image = preprocessing.scale(image)
 width = 100
 height = 20
 
+found_characters = []
+
 for y in range(height-19):
-    for x in range(0, width-19, 2):
+    x = 0
+    while x < width-19:
         cropped_image = []
         for dy in range(20):
             start = x + (y+dy)*width
@@ -122,7 +125,17 @@ for y in range(height-19):
         print prob
         if prob[0][predicted]>0.50:
             print chr(predicted+97)
+            found_characters.append([x,y])
+            x += 9
+        x += 1
+            
         #if classifier_type=='gnb':
         #    print classifier.predict_proba(cropped_image)
 
+image = Image.open(path)
+for x,y in found_characters:
+    draw = ImageDraw.Draw(image)
+    draw.rectangle(((x,y),(x+19,y+19)), outline="blue")
+
+image.save(os.getcwd()+"/boxed_image.jpg")
 
