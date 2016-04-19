@@ -1,3 +1,5 @@
+# Python 2.7
+
 import sklearn
 from sklearn import datasets, svm, tree, metrics, preprocessing
 from sklearn.naive_bayes import GaussianNB
@@ -6,6 +8,7 @@ import numpy as np
 import os
 from PIL import Image, ImageDraw
 from decimal import Decimal
+from random import randint
 
 # 'svc' | 'dt' | 'gnb'
 classifier_type = 'svc'
@@ -96,6 +99,13 @@ predicted = classifier.predict(x_test)
 # Print result
 print("Classification report for classifier %s:\n%s\n" % (classifier, metrics.classification_report(test_target, predicted)))
 
+# Five predictions
+print "Five predictions choosen at random from the test set:"
+for i in range(5):
+    r = randint(0, len(test_target))
+    print "Target: " + str(test_target[r])
+    print "Prediction: " + str(classifier.predict(x_test[r]))
+    print " "
 
 # Window slider
 path = os.getcwd() + "/abc.jpg"
@@ -105,6 +115,8 @@ print image
 image = list(image.getdata()) 
 image = [float(x) for x in image]
 image = np.array(image)
+
+# Preprocess the image
 image = ndimage.median_filter(image, 3)
 image = preprocessing.scale(image)
 width = 100
@@ -122,16 +134,13 @@ for y in range(height-19):
                 cropped_image.append(image[start+dx])
         predicted = classifier.predict(cropped_image)
         prob = classifier.predict_proba(cropped_image)
-        print prob
-        if prob[0][predicted]>0.50:
-            print chr(predicted+97)
+        if prob[0][predicted]>0.45:
+            print chr(predicted+97) +"  x:"+str(x)+"  y:"+str(y)
             found_characters.append([x,y])
+            # Skip a bit to avoid detecting the same character multiple times
             x += 9
         x += 1
             
-        #if classifier_type=='gnb':
-        #    print classifier.predict_proba(cropped_image)
-
 image = Image.open(path)
 for x,y in found_characters:
     draw = ImageDraw.Draw(image)
